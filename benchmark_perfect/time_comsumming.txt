@@ -8,9 +8,9 @@ real 178.80
 user 178.74
 sys 0.04
 Misa
-real 129.63
-user 128.37
-sys 0.88
+real 112.27
+user 111.43
+sys 0.77
 python-PERF
 real 54.95
 user 56.80
