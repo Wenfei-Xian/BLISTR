@@ -1,0 +1,89 @@
+Repeat1
+BLISTR:
+real 4.13
+user 4.06
+sys 0.06
+Kmer-SSR
+real 178.80
+user 178.74
+sys 0.04
+Misa
+real 129.63
+user 128.37
+sys 0.88
+python-PERF
+real 54.95
+user 56.80
+sys 5.55
+pypy-PERF
+real 13.76
+user 15.46
+sys 5.63
+Divissr
+real 2.94
+user 4.94
+sys 5.43
+Dot2dot
+real 19.29
+user 18.71
+sys 0.57
+
+Repeat2
+BLISTR:
+real 4.07
+user 4.00
+sys 0.06
+Kmer-SSR
+real 173.13
+user 172.99
+sys 0.08
+Misa
+real 117.96
+user 114.75
+sys 1.07
+python-PERF
+real 58.24
+user 57.74
+sys 5.55
+pypy-PERF
+real 19.59
+user 15.61
+sys 5.69
+Divissr
+real 2.89
+user 4.99
+sys 5.38
+Dot2dot
+real 19.45
+user 18.75
+sys 0.69
+
+Repeat3
+BLISTR:
+real 4.05
+user 3.98
+sys 0.05
+Kmer-SSR
+real 172.79
+user 172.71
+sys 0.07
+Misa
+real 118.97
+user 117.95
+sys 0.94
+python-PERF
+real 54.97
+user 56.92
+sys 5.46
+pypy-PERF
+real 13.90
+user 15.53
+sys 5.72
+Divissr
+real 2.93
+user 4.97
+sys 5.40
+Dot2dot
+real 19.74
+user 18.75
+sys 0.97
