@@ -18,3 +18,9 @@ PERF_pypy: pypy ../bin/perf/PERF/core.py -i $genome -m 1 -M 6 -u **repeat_units.
 divissr: python3 ../bin/divissr/divissr/core.py -i $genome -o $1.divissr.out  
 Dot2dot: dot.linux -c **dot2dot.config** -s $genome 1> dot2dot.out  
 BLISTR perfect_str_default -f $genome 1> BLISTR_perfect.out  
+
+**Time comsumming**  
+   | repeat1 | repeat2 | repeat3  
+kmer-ssr|  
+sfds|  
+fdsfd  
