@@ -12,6 +12,6 @@ bedtools subtract -A -a BLISTR.c12-6-4-3-2-2.p0.2-0.3-0.4-0.5-0.5-1.e1-1-1-1-1-1
 bedtools intersect -f 0.5 -a trf.dat.nocentro.sorted.overlap.bed -b BLISTR.c12-6-4-3-2-2.p0.2-0.3-0.4-0.5-0.5-1.e1-1-1-1-1-1.out.noncentro.bed -v | wc -l  
 bedtools intersect -f 0.5 -a trf.dat.nocentro.sorted.overlap.bed -b BLISTR.c12-6-4-3-2-2.p0.2-0.3-0.4-0.5-0.5-1.e1-1-1-1-1-1.out.noncentro.bed -wa -wb | awk '{print $3-$2"\t"$25}' > overlap.site  
 
-
+  
 Look4TRs  
 time -p Look4TRs --adr Col-0.Chr_scaffolds.fa.divide --out Col-0.Chr_scaffolds.fa.out --min 4 --max 6 --idn 50 --int 10 --mtf 1 --thr 1 --prn 2000 --ord 0 --minm 1 --maxm 6 --win 4 --seg 3000000 2> Look4TRs.err  
