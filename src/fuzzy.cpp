@@ -9,31 +9,37 @@ int score(char a, char b) {
 	return a == b ? MATCH : MISMATCH;
 }
 
-int optimizedDP1_6( string_view left, string_view right, int maxInsertLength, int &matchingBases, int &editDistance, const int m, const int n) { //specific for short unit
-	
-	int dp[2][8]={0};
-	int direction[2][8]={0};
-	//vector<vector<int>> dp(maxInsertLength + 1, vector<int>(n + 1, 0));
-	//vector<vector<int>> direction(maxInsertLength + 1, vector<int>(n + 1, 0)); // 0: match, 1: deletion, 2: insertion
+struct DPInfo {
+    int dp;
+    int direction;
+};
+
+DPInfo merged_dp_direction_L6_I1[2000][2000] = {{0, 0}};
+
+int optimizedDP_L6_I1( string_view left, string_view right, int maxInsertLength, int &matchingBases, int &editDistance, const int m, const int n) { //specific for short unit
 	
 	int max_score = 0;
 	int max_i = 0;
 	int max_j = 0;
-
 	for (int i = 1; i <= m; ++i) {
 		for (int j = max(1, i - maxInsertLength); j <= min(n, i + maxInsertLength); ++j) {
-			int match_score = dp[(i - 1) % (maxInsertLength + 1)][j - 1] + score(left[i-1], right[j-1]);
-			int del = dp[(i - 1) % (maxInsertLength + 1)][j] + GAP;
-			int ins = dp[i % (maxInsertLength + 1)][j - 1] + GAP;
+			int match_score = merged_dp_direction_L6_I1[i - 1][j - 1].dp + score(left[i-1], right[j-1]);
+			int del = merged_dp_direction_L6_I1[i - 1][j].dp + GAP;
+			int ins = merged_dp_direction_L6_I1[i][j - 1].dp + GAP;
+			
 			int max_val = max({0, match_score, del, ins});
+			int direction_val;
+
 			if (max_val == match_score) {
-				direction[i % (maxInsertLength + 1)][j] = 0;
-			} else if (max_val == del) {
-				direction[i % (maxInsertLength + 1)][j] = 1;
+				direction_val = 0;
+			}else if (max_val == del) {
+				direction_val = 1;
 			} else {
-				direction[i % (maxInsertLength + 1)][j] = 2;
+				direction_val = 2;
 			}
-			dp[i % (maxInsertLength + 1)][j] = max_val;
+
+			merged_dp_direction_L6_I1[i][j] = {max_val, direction_val};
+
 			if (max_val > max_score) {
 				max_score = max_val;
 				max_i = i;
@@ -42,23 +48,24 @@ int optimizedDP1_6( string_view left, string_view right, int maxInsertLength, in
 		}
 	}
 
-	//backtracking
 	matchingBases = 0;
 	editDistance = 0;
-	int backtrack_i = max_i; // Save the original values before backtracking
+	int backtrack_i = max_i;
 	int backtrack_j = max_j;
 
 	while (backtrack_i > 0 || backtrack_j > 0) {
-		if (backtrack_i == 0) {  // If we've already processed the entire left sequence
-			editDistance++;  // These are insertions in the right sequence
+		if (backtrack_i == 0) {
+			editDistance++;
 			backtrack_j--;
 			continue;
-		} else if (backtrack_j == 0) {  // If we've already processed the entire right sequence
-			editDistance++;  // These are deletions in the left sequence
+		}
+		else if (backtrack_j == 0) {
+			editDistance++;
 			backtrack_i--;
 			continue;
 		}
-		if (direction[backtrack_i % (maxInsertLength + 1)][backtrack_j] == 0) { // match or mismatch
+		int current_direction = merged_dp_direction_L6_I1[backtrack_i][backtrack_j].direction;
+		if (current_direction == 0) {
 			if (left[backtrack_i - 1] == right[backtrack_j - 1]) {
 				matchingBases++;
 			} else {
@@ -66,228 +73,24 @@ int optimizedDP1_6( string_view left, string_view right, int maxInsertLength, in
 			}
 			backtrack_i--;
 			backtrack_j--;
-		} else if (direction[backtrack_i % (maxInsertLength + 1)][backtrack_j] == 1) { // deletion
+		}else if (current_direction == 1) {
 			editDistance++;
- 			backtrack_i--;
-    		} else { // insertion
-        		editDistance++;
-        		backtrack_j--;
-    		}
+			backtrack_i--;
+		}else {
+			editDistance++;
+			backtrack_j--;
+		}
 	}
-    	return max_j; // Return the saved end position value
+	return max_j;
 }
 
-int optimizedDP7_10( string_view left, string_view right, int maxInsertLength, int &matchingBases, int &editDistance, const int m, const int n) {
-	
-	int dp[2][12]={0};
-	int direction[2][12]={0};
-	//vector<vector<int>> dp(maxInsertLength + 1, vector<int>(n + 1, 0));
-	//vector<vector<int>> direction(maxInsertLength + 1, vector<int>(n + 1, 0)); // 0: match, 1: deletion, 2: insertion
-	
-	int max_score = 0;
-	int max_i = 0;
-	int max_j = 0;
-
-	for (int i = 1; i <= m; ++i) {
-		for (int j = max(1, i - maxInsertLength); j <= min(n, i + maxInsertLength); ++j) {
-			int match_score = dp[(i - 1) % (maxInsertLength + 1)][j - 1] + score(left[i-1], right[j-1]);
-			int del = dp[(i - 1) % (maxInsertLength + 1)][j] + GAP;
-			int ins = dp[i % (maxInsertLength + 1)][j - 1] + GAP;
-			int max_val = max({0, match_score, del, ins});
-			if (max_val == match_score) {
-				direction[i % (maxInsertLength + 1)][j] = 0;
-			} else if (max_val == del) {
-				direction[i % (maxInsertLength + 1)][j] = 1;
-			} else {
-				direction[i % (maxInsertLength + 1)][j] = 2;
-			}
-			dp[i % (maxInsertLength + 1)][j] = max_val;
-			if (max_val > max_score) {
-				max_score = max_val;
-				max_i = i;
-				max_j = j;
-			}
-		}
-	}
-
-	//backtracking
-	matchingBases = 0;
-	editDistance = 0;
-	int backtrack_i = max_i; // Save the original values before backtracking
-	int backtrack_j = max_j;
-
-	while (backtrack_i > 0 || backtrack_j > 0) {
-		if (backtrack_i == 0) {  // If we've already processed the entire left sequence
-			editDistance++;  // These are insertions in the right sequence
-			backtrack_j--;
-			continue;
-		} else if (backtrack_j == 0) {  // If we've already processed the entire right sequence
-			editDistance++;  // These are deletions in the left sequence
-			backtrack_i--;
-			continue;
-		}
-		if (direction[backtrack_i % (maxInsertLength + 1)][backtrack_j] == 0) { // match or mismatch
-			if (left[backtrack_i - 1] == right[backtrack_j - 1]) {
-				matchingBases++;
-			} else {
-				editDistance++;
-			}
-			backtrack_i--;
-			backtrack_j--;
-		} else if (direction[backtrack_i % (maxInsertLength + 1)][backtrack_j] == 1) { // deletion
-			editDistance++;
- 			backtrack_i--;
-    		} else { // insertion
-        		editDistance++;
-        		backtrack_j--;
-    		}
-	}
-    	return max_j; // Return the saved end position value
-}
-
-int optimizedDP11_20( string_view left, string_view right, int maxInsertLength, int &matchingBases, int &editDistance, const int m, const int n) {
-
-	int dp[4][24]={0};
-	int direction[4][24]={0};
-	//vector<vector<int>> dp(maxInsertLength + 1, vector<int>(n + 1, 0));
-	//vector<vector<int>> direction(maxInsertLength + 1, vector<int>(n + 1, 0)); // 0: match, 1: deletion, 2: insertion
-
-	int max_score = 0;
-	int max_i = 0;
-	int max_j = 0;
-
-	for (int i = 1; i <= m; ++i) {
-		for (int j = max(1, i - maxInsertLength); j <= min(n, i + maxInsertLength); ++j) {
-			int match_score = dp[(i - 1) % (maxInsertLength + 1)][j - 1] + score(left[i-1], right[j-1]);
-			int del = dp[(i - 1) % (maxInsertLength + 1)][j] + GAP;
-			int ins = dp[i % (maxInsertLength + 1)][j - 1] + GAP;
-			int max_val = max({0, match_score, del, ins});
-			if (max_val == match_score) {
-				direction[i % (maxInsertLength + 1)][j] = 0;
-			} else if (max_val == del) {
-				direction[i % (maxInsertLength + 1)][j] = 1;
-			} else {
-				direction[i % (maxInsertLength + 1)][j] = 2;
-			}
-			dp[i % (maxInsertLength + 1)][j] = max_val;
-			if (max_val > max_score) {
-				max_score = max_val;
-				max_i = i;
-				max_j = j;
-			}
-		}
-	}
-
-	//backtracking
-	matchingBases = 0;
-	editDistance = 0;
-	int backtrack_i = max_i; // Save the original values before backtracking
-	int backtrack_j = max_j;
-
-	while (backtrack_i > 0 || backtrack_j > 0) {
-		if (backtrack_i == 0) {  // If we've already processed the entire left sequence
-			editDistance++;  // These are insertions in the right sequence
-			backtrack_j--;
-			continue;
-		} else if (backtrack_j == 0) {  // If we've already processed the entire right sequence
-			editDistance++;  // These are deletions in the left sequence
-			backtrack_i--;
-			continue;
-		}
-		if (direction[backtrack_i % (maxInsertLength + 1)][backtrack_j] == 0) { // match or mismatch
-			if (left[backtrack_i - 1] == right[backtrack_j - 1]) {
-				matchingBases++;
-			} else {
-				editDistance++;
-			}
-			backtrack_i--;
-			backtrack_j--;
-		} else if (direction[backtrack_i % (maxInsertLength + 1)][backtrack_j] == 1) { // deletion
-			editDistance++;
- 			backtrack_i--;
-    		} else { // insertion
-        		editDistance++;
-        		backtrack_j--;
-    		}
-	}
-    	return max_j; // Return the saved end position value
-}
-
-int optimizedDP21_50( string_view left, string_view right, int maxInsertLength, int &matchingBases, int &editDistance, const int m, const int n) {
-	
-	int dp[6][58]={0};
-	int direction[6][58]={0};
-	//vector<vector<int>> dp(maxInsertLength + 1, vector<int>(n + 1, 0));
-	//vector<vector<int>> direction(maxInsertLength + 1, vector<int>(n + 1, 0)); // 0: match, 1: deletion, 2: insertion
-	
-	int max_score = 0;
-	int max_i = 0;
-	int max_j = 0;
-
-	for (int i = 1; i <= m; ++i) {
-		for (int j = max(1, i - maxInsertLength); j <= min(n, i + maxInsertLength); ++j) {
-			int match_score = dp[(i - 1) % (maxInsertLength + 1)][j - 1] + score(left[i-1], right[j-1]);
-			int del = dp[(i - 1) % (maxInsertLength + 1)][j] + GAP;
-			int ins = dp[i % (maxInsertLength + 1)][j - 1] + GAP;
-			int max_val = max({0, match_score, del, ins});
-			if (max_val == match_score) {
-				direction[i % (maxInsertLength + 1)][j] = 0;
-			} else if (max_val == del) {
-				direction[i % (maxInsertLength + 1)][j] = 1;
-			} else {
-				direction[i % (maxInsertLength + 1)][j] = 2;
-			}
-			dp[i % (maxInsertLength + 1)][j] = max_val;
-			if (max_val > max_score) {
-				max_score = max_val;
-				max_i = i;
-				max_j = j;
-			}
-		}
-	}
-
-	//backtracking
-	matchingBases = 0;
-	editDistance = 0;
-	int backtrack_i = max_i; // Save the original values before backtracking
-	int backtrack_j = max_j;
-
-	while (backtrack_i > 0 || backtrack_j > 0) {
-		if (backtrack_i == 0) {  // If we've already processed the entire left sequence
-			editDistance++;  // These are insertions in the right sequence
-			backtrack_j--;
-			continue;
-		} else if (backtrack_j == 0) {  // If we've already processed the entire right sequence
-			editDistance++;  // These are deletions in the left sequence
-			backtrack_i--;
-			continue;
-		}
-		if (direction[backtrack_i % (maxInsertLength + 1)][backtrack_j] == 0) { // match or mismatch
-			if (left[backtrack_i - 1] == right[backtrack_j - 1]) {
-				matchingBases++;
-			} else {
-				editDistance++;
-			}
-			backtrack_i--;
-			backtrack_j--;
-		} else if (direction[backtrack_i % (maxInsertLength + 1)][backtrack_j] == 1) { // deletion
-			editDistance++;
- 			backtrack_i--;
-    		} else { // insertion
-        		editDistance++;
-        		backtrack_j--;
-    		}
-	}
-    	return max_j; // Return the saved end position value
-}
-
-void find_fuzzy(string DNA, string id, int unitlen_p, int up_p, unsigned int flanking_p, int revercomple_p, string cutoffunit_p, string arg, string unperfect_percentage_p ){	
+void find_fuzzy(string DNA, string id, int unitlen_p, int up_p, unsigned int flanking_p, int revercomple_p, string cutoffunit_p, string arg, string unperfect_percentage_p, string edit, int distance ){
 	
 	if( up_p == 1){ // up_p : whether transfer all the character to upper, default: 0
 		transform( DNA.begin(), DNA.end(), DNA.begin(), ::toupper);
 	}
 
-	int cutoff_array_main[201];
+	int cutoff_array_main[2001];
 	istringstream iss(cutoffunit_p);
 	string token;
 	char split=',';
@@ -297,8 +100,9 @@ void find_fuzzy(string DNA, string id, int unitlen_p, int up_p, unsigned int fla
 		cutoff_array_main[pos]=cutoff;
 		pos++;
 	}
+
 	//cout << unperfect_percentage_p << endl;
-	double unperfect_percentage_values[201];
+	double unperfect_percentage_values[2001];
 	istringstream iss2(unperfect_percentage_p);
 	string token2;
 	int pos2=1;
@@ -308,37 +112,20 @@ void find_fuzzy(string DNA, string id, int unitlen_p, int up_p, unsigned int fla
 		pos2++;
 	}
 	
-        unsigned int DNA_len=DNA.length();
-
-	int insertion_values[201];
-	for (unsigned short ssr_len = 1; ssr_len <= unitlen_p; ssr_len++) { // Pre-calculation loop
-		
-		int insertion = 1;
-		if(ssr_len <= 10){
-			insertion = 1;
-		}
-		else if(ssr_len <= 20){
-			insertion = 3;
-		}
-		else if(ssr_len <= 50){
-			insertion = 5;
-		}
-		else if(ssr_len <=100){
-			insertion = 10;
-		}
-		else if(ssr_len <=200){
-			insertion = 20;
-		}
-		else{
-			insertion = 30;
-		}
-		insertion_values[ssr_len] = insertion;
-		
-		if(ssr_len > 6){
-			unperfect_percentage_values[ssr_len] = 1;
-		}
+	//int edit_cutoff_array[201];
+	int insertion_values[2001];
+	istringstream iss3(edit);
+	//cout << "!!!!!!!!" << edit << endl;
+	string token3;
+	int pos3=1;
+	while( getline(iss3, token3, split) ){
+		int cutoff3 = stoi(token3);
+		//edit_cutoff_array[pos3]=cutoff3;
+		insertion_values[pos3] = cutoff3;
+		pos3++;
 	}
 
+        unsigned int DNA_len=DNA.length();
 
         for ( unsigned int start=0; start < DNA_len; start++){
                 for (unsigned short ssr_len=1; ssr_len<= unitlen_p ; ssr_len++){ // unitlen_p : longest length of unit, default: 6
@@ -347,7 +134,6 @@ void find_fuzzy(string DNA, string id, int unitlen_p, int up_p, unsigned int fla
 			float unperfect_percentage = unperfect_percentage_values[ssr_len]; // Optimization 1
 			unsigned short repeat=1;
 			unsigned int start_new=start+ssr_len;
-
 			string ssr_region; // used for output
 			string_view left_unit; // Optimization string 2 string_view when substr is needed
 			if (start+ssr_len < DNA_len) {
@@ -374,8 +160,8 @@ void find_fuzzy(string DNA, string id, int unitlen_p, int up_p, unsigned int fla
 				int endPosition=0;
 
 				if( ssr_len <=6 ){
-					endPosition = optimizedDP1_6(left_unit, right_unit, insertion, matchingBases, editDistance, ssr_len, ssr_len+insertion);
-				}
+					endPosition = optimizedDP_L6_I1(left_unit, right_unit, insertion, matchingBases, editDistance, ssr_len, ssr_len+insertion);
+				}/*
 				else if( ssr_len >=7 && ssr_len <=10 ){
 					endPosition = optimizedDP7_10(left_unit, right_unit, insertion, matchingBases, editDistance, ssr_len, ssr_len+insertion);
 				}
@@ -385,8 +171,9 @@ void find_fuzzy(string DNA, string id, int unitlen_p, int up_p, unsigned int fla
 				else if( ssr_len >=21 && ssr_len <=50 ){
 					endPosition = optimizedDP21_50(left_unit, right_unit, insertion, matchingBases, editDistance, ssr_len, ssr_len+insertion);
 				}
-
-				if( matchingBases == ssr_len && endPosition == ssr_len ){
+				*/
+				//if( matchingBases == ssr_len && endPosition == ssr_len ){
+				if( editDistance == 0 ){
 					perfect_copy++;
 				}
 
@@ -419,8 +206,8 @@ void find_fuzzy(string DNA, string id, int unitlen_p, int up_p, unsigned int fla
 					start_new+=endPosition;
                                 }
 				else if( ssr_len > 1 && ssr_len <=6 ){ //BUG 1-unperfect_percentage = 0.199999988079071, rather than 0.2 BUGBUGBUGBUGBUGBUG
-                                        if( matchingBases < ssr_len-insertion || editDistance > 1 ){
-                                                //cout << "#***** No match: " << start << "\t" << left_unit << "\t" << right_unit << "\t" << repeat << endl;
+                                        if( matchingBases < ssr_len-insertion || editDistance > insertion ){ // Sep 1
+                                                //cout << "#***** No match: " << start << "\t" << left_unit << "\t" << right_unit << "\t" << repeat << "\t" << editDistance << "\t" << matchingBases<< endl;
 						repeat--;
 						break;
                                         }
@@ -484,12 +271,12 @@ void find_fuzzy(string DNA, string id, int unitlen_p, int up_p, unsigned int fla
 				
 				if( flanking_p == 0 ){
 					cout << id << "\t" << start+1 << "\t" << start_new << "\t" << left_unit << "\t" << repeat << "\t" << perfect_copy << "\t" << start_new-start;
-					//cout << id << "\t" << start+1 << "\t" << start_new << "\t" << repeat << "\t" << left_unit << "\t" << start_new-start;
 					cout << "\t" << ssr_region ;
 					cout << "\n";
-					//start+=(start_new-start); Wed Aug 16 1:23 BUG
-					start+=(start_new-start-5);
-                                	break;
+					start+=(start_new-start-1+distance);
+					//start+=(start_new-start-1-ssr_len);
+                                	//start++;
+					break;
 				}
 				else if( flanking_p > 0 ){
 					string flanking_seq;
@@ -505,7 +292,8 @@ void find_fuzzy(string DNA, string id, int unitlen_p, int up_p, unsigned int fla
 						cout << "\t" << flanking_seq1;
 						cout << "\t" << flanking_seq2;
 						cout << "\n";
-						start+=(start_new-start-3);
+						start+=(start_new-start-1+distance);
+						//start+=(start_new-start-1-ssr_len);
 						break;
 					}
 					else if ( start <= flanking_p && start_new + flanking_p < DNA_len ){
@@ -518,7 +306,8 @@ void find_fuzzy(string DNA, string id, int unitlen_p, int up_p, unsigned int fla
 						cout << "\t" << flanking_seq1;
 						cout << "\t" << flanking_seq2;
                                                 cout << "\n";
-                                                start+=(start_new-start-3);
+						start+=(start_new-start-1+distance);
+						//start+=(start_new-start-1-ssr_len);
                                                 break;
 					}
 					else if ( start > flanking_p && start_new + flanking_p >= DNA_len ){
@@ -531,7 +320,8 @@ void find_fuzzy(string DNA, string id, int unitlen_p, int up_p, unsigned int fla
 						cout << "\t" << flanking_seq1;
 						cout << "\t" << flanking_seq2;
 						cout << "\n";
-						start+=(start_new-start-3);
+						start+=(start_new-start-1+distance);
+						//start+=(start_new-start-1-ssr_len);
 						break;
 					}
 					else if ( start <= flanking_p && start_new+flanking_p >= DNA_len ){
@@ -543,16 +333,14 @@ void find_fuzzy(string DNA, string id, int unitlen_p, int up_p, unsigned int fla
 						cout << "\t" << flanking_seq2;
 						cout << "\t" << DNA;
 						cout << "\n";
-						start+=(start_new-start-3);
+						start+=(start_new-start-1+distance);
+						//start+=(start_new-start-1-ssr_len);
 						break;
 					}
 				}
 				}
 				}
 			}
-			//else{
-			//	cout << "#******" << start << "\t" << left_unit << "\t" << perfect_copy+1 << "\t"<< repeat*unperfect_percentage << endl;
-			//}
                 }
         }
 }

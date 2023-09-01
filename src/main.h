@@ -17,7 +17,6 @@
 #include <limits.h>
 #include <assert.h>
 #include <math.h>
-
 int perfect_model( int argc, char *argv[] );
 int fuzzy_model( int argc, char *argv[] );
 int usage();

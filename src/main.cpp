@@ -19,15 +19,30 @@ int main( int argc, char *argv[] ){
 
 }
 
+string read_gz_line(gzFile &gz_input) {
+    char buffer[1024];
+    string line;
+    while(true) {
+        if(gzgets(gz_input, buffer, sizeof(buffer)) == NULL) {
+	    return "";
+        }
+        line += buffer;
+        if (line.back() == '\n') {
+            line.pop_back();
+            return line;
+        }
+    }
+}
+
 int usage(){
 	cout << "BLISTR: BLurry Imperfect Short Tandem Repeats" << endl;
 	cout << "Usage: BLISTR <command> [options]" << endl;
 	cout << "Command:" << endl;
 	cout << "	perfect_str_default <options>" << endl;
-	cout << "	perfect_vntr_default <options>" << endl;
+	//cout << "	perfect_vntr_default <options>" << endl;
 	cout << "	perfect_costom <options>" << endl;
 	cout << "	fuzzy_str_default <options>" << endl;
-	cout << "	fuzzy_vntr_default <options>" << endl;
+	//cout << "	fuzzy_vntr_default <options>" << endl;
 	cout << "	fuzzy_costom <options>" << endl;
 	return 0;
 }
@@ -86,11 +101,11 @@ int perfect_model( int argc, char *argv[] ){
 			cout << "Usage: BLISTR perfect_str_default <options>" << endl;
 			cout << "	unit length range is 1-6bp and copy number threshold is 10,5,4,3,2,2" << endl;
 		}
-		else if( arg == "perfect_vntr_default"){
-			cout << "BLISTR: BLurry Imperfect Short Tandem Repeats" << endl;
-			cout << "Usage: BLISTR perfect_vntr_default <options>" << endl;
-			cout << "	unit length range is 7-200bp and 10,5,4,3,2,2,2,2,2,2,2...." << endl;
-		}
+		//else if( arg == "perfect_vntr_default"){
+		//	cout << "BLISTR: BLurry Imperfect Short Tandem Repeats" << endl;
+		//	cout << "Usage: BLISTR perfect_vntr_default <options>" << endl;
+		//	cout << "	unit length range is 7-200bp and 10,5,4,3,2,2,2,2,2,2,2...." << endl;
+		//}
 		else if( arg == "perfect_costom"){
 			cout << "BLISTR: BLurry Imperfect Short Tandem Repeats" << endl;
 			cout << "Usage: BLISTR perfect_costom <options>" << endl;
@@ -107,12 +122,26 @@ int perfect_model( int argc, char *argv[] ){
 		return -1;
 	}
 	
-	ifstream input( fasta );
+	ifstream input;
+	gzFile gz_input=nullptr;
 
-	if( !input.good() ){
-		cerr << "Can't open " << fasta << endl;
-		return -1;
+	string file_extension = fasta.substr(fasta.size() - 3); // Take last 3 characters of filename
+	bool is_gzip = (file_extension == ".gz");
+
+	if (is_gzip) {
+		gz_input = gzopen(fasta.c_str(), "r");
+		if (!gz_input) {
+			cerr << "Can't open " << fasta << endl;
+			return -1;
+		}
 	}
+	else {
+        	input.open(fasta);
+        	if (!input.good()) {
+            	cerr << "Can't open " << fasta << endl;
+            	return -1;
+        	}
+    	}	
 
 	int num=count(cutoffunit_p.begin(),cutoffunit_p.end(),',');
 	
@@ -135,27 +164,58 @@ int perfect_model( int argc, char *argv[] ){
 	}
 
 	string line, id, DNA;
-	while( getline(input, line) ){
-		if( line.empty() ){
-			continue;
+	if (is_gzip) {
+		gz_input = gzopen(fasta.c_str(), "r");
+		if (!gz_input) {
+			cerr << "Can't open " << fasta << endl;
+			return -1;
 		}
-		if( line[0] == '>' ){
-			if( !id.empty() ){
-				//find_perfect( DNA, id, unitlen_p, ssrlen_p, flanking_p, up_p, revercomple_p,mincopy_p,cutoffunit_p);
-				find_perfect( DNA, id, unitlen_p, flanking_p, up_p, revercomple_p, cutoffunit_p, arg);
+		while ( true ) {
+			line = read_gz_line(gz_input);
+			if (line.empty()) {
+				if( !id.empty() ){
+					find_perfect(DNA, id, unitlen_p, flanking_p, up_p, revercomple_p, cutoffunit_p, arg);
+				}
+				break;
 			}
-			id=line.substr(1);
-			DNA.clear();
+
+			if( line[0] == '>' ){
+				if( !id.empty() ){
+					find_perfect( DNA, id, unitlen_p, flanking_p, up_p, revercomple_p, cutoffunit_p, arg);
+				}
+				id=line.substr(1);
+				DNA.clear();
+			}
+			else{
+				DNA+=line;
+			}
 		}
-		else{
-			DNA+=line;
+		gzclose(gz_input);
+		return 0;
+	}
+	else{
+		while( getline(input, line) ){
+			if( line.empty() ){
+				continue;
+			}
+			if( line[0] == '>' ){
+				if( !id.empty() ){
+					//find_perfect( DNA, id, unitlen_p, ssrlen_p, flanking_p, up_p, revercomple_p,mincopy_p,cutoffunit_p);
+					find_perfect( DNA, id, unitlen_p, flanking_p, up_p, revercomple_p, cutoffunit_p, arg);
+				}
+				id=line.substr(1);
+				DNA.clear();
+			}
+			else{
+				DNA+=line;
+			}
 		}
+		if( !id.empty() ){
+			//find_perfect( DNA, id, unitlen_p, ssrlen_p, flanking_p, up_p, revercomple_p,mincopy_p,cutoffunit_p);
+			find_perfect( DNA, id, unitlen_p, flanking_p, up_p, revercomple_p, cutoffunit_p, arg);
+		}
+		return 0;
 	}
-	if( !id.empty() ){
-		//find_perfect( DNA, id, unitlen_p, ssrlen_p, flanking_p, up_p, revercomple_p,mincopy_p,cutoffunit_p);
-		find_perfect( DNA, id, unitlen_p, flanking_p, up_p, revercomple_p, cutoffunit_p, arg);
-	}
-	return 0;
 }
 
 int fuzzy_model( int argc, char *argv[] ){
@@ -165,8 +225,10 @@ int fuzzy_model( int argc, char *argv[] ){
 	int up_p=0;
 	int flanking_p=0;
 	int revercomple_p=0;
-	string cutoffunit_p="10,5,4,3,2,2";
-	string unperfect_percentage_p="0.2,0.2,0.4,0.5,0.5,0.5";
+	int distance=-6;
+	string edit="1,1,1,1,1,1";
+	string cutoffunit_p="12,6,4,3,2,2";
+	string unperfect_percentage_p="0.3,0.4,0.5,0.5,0.5,1";
 	string arg;
 	string fasta;
 	arg=getFirstArgument(argc, argv);
@@ -177,7 +239,7 @@ int fuzzy_model( int argc, char *argv[] ){
 
 	int para=0;
 	
-	while(( a=getopt( argc, argv, "f:l:s:u:r:c:p:")) >= 0 ){
+	while(( a=getopt( argc, argv, "f:l:s:u:r:c:p:e:d:")) >= 0 ){
 
 		if( a == 'f' ){
 			fasta=optarg;
@@ -207,19 +269,27 @@ int fuzzy_model( int argc, char *argv[] ){
 			unperfect_percentage_p=optarg;
 			para++;
 		}
+		else if( a == 'e' ){
+			edit=optarg;
+			para++;
+		}
+		else if( a == 'd' ){
+			distance=atof(optarg);
+			para++;
+		}
 	}
 
         if( para == 0 ){
                 if( arg == "fuzzy_str_default"){
                         cout << "BLISTR: BLurry Imperfect Short Tandem Repeats" << endl;
                         cout << "Usage: BLISTR fuzzy_str_default <options>" << endl;
-                        cout << "	unit length range is 1-6bp and copy number threshold is 10,5,4,3,2,2" << endl;
+                        cout << "	unit length range is 1-6bp, copy number threshold is 12,6,4,3,2,2, percentage of imperfect threshold is 0.3,0.4,0.5,0.5,0.5,1, edit distance of each unit is 1,1,1,1,1,1" << endl;
                 }
-                else if( arg == "fuzzy_vntr_default"){
-                        cout << "BLISTR: BLurry Imperfect Short Tandem Repeats" << endl;
-                        cout << "Usage: BLISTR fuzzy_vntr_default <options>" << endl;
-                        cout << "	unit length range is 7-200bp and 10,5,4,3,2,2,2,2,2,2,2...." << endl;
-                }
+                //else if( arg == "fuzzy_vntr_default"){
+                //        cout << "BLISTR: BLurry Imperfect Short Tandem Repeats" << endl;
+                //        cout << "Usage: BLISTR fuzzy_vntr_default <options>" << endl;
+                //        cout << "	unit length range is 7-200bp, copy number threshold is 10,5,4,3,2,2,2,2,2,2..., percentage of imperfect threshold is 0.3,0.4,0.5,0.5,0.5,1,1,1,1,1..." << endl;
+                //}
                 else if( arg == "fuzzy_costom"){
                         cout << "BLISTR: BLurry Imperfect Short Tandem Repeats" << endl;
                         cout << "Usage: BLISTR fuzzy_costom <options>" << endl;
@@ -227,20 +297,37 @@ int fuzzy_model( int argc, char *argv[] ){
                 cout << "Options:" << endl;
 		cout << "	-f string     fasta format file (mandatory)" << endl;
                 if( arg == "fuzzy_costom" ){
-                        cout << "	-l int        maximum length of SSR unit, example: -l 10 (mandatory)" << endl;
-                        cout << "	-c string     copy shreshold for each unit, example: -c 10,5,4,3,2,2,2,2,2,2 (mandatory)" << endl;
-			cout << "	-p string     percentage of unperfect units, example: -p 0.2,0.2,0.4,0.5,0.5,0.5" << endl;
-                }
+                        cout << "	-l int        maximum length of SSR unit, example: -l 6 (mandatory)" << endl;
+                        cout << "	-c string     copy shreshold for each unit, example: -c 12,6,4,3,2,2 (mandatory)" << endl;
+			cout << "	-p string     percentage of imperfect units, example: -p 0.3,0.4,0.5,0.5,0.5,1 (mandatory)" << endl;
+                	cout << "	-e string     edit distance for each unit, example: -e 1,1,1,1,1,2 (mandatory)" << endl;
+			cout << "	-d int        Maximum distance between two seperate STR regions, using negative value for overlapping STRs, example: -d -4" << endl;
+		}
 		cout << "	-u int        whether to replace all letters with uppercase letters (default value: 0 -> don't replace; 1 -> replace)" << endl;
 		cout << "	-s int        whether output the flanking sequnce of SSR region (default value: 0 -> don't output; length of flanking sequences -> output)" << endl;
 		cout << "	-r int        whether output the reverse complement sequence (defalut value: 0 -> don't output; 1 -> output)" << endl; 
 		return -1;
         }
 
-	ifstream input( fasta );
-	if( !input.good() ){
-		cerr << "Can't open " << fasta << endl;
-		return -1;
+	//ifstream input( fasta );
+	ifstream input;
+	gzFile gz_input = nullptr;
+
+	string file_extension = fasta.substr(fasta.size() - 3);
+	bool is_gzip = (file_extension == ".gz");
+
+	if (is_gzip) {
+		gz_input = gzopen(fasta.c_str(), "r");
+		if (!gz_input) {
+			cerr << "Can't open " << fasta << endl;
+			return -1;
+		}
+	}else {
+		input.open(fasta);
+		if (!input.good()) {
+			cerr << "Can't open " << fasta << endl;
+			return -1;
+		}
 	}
 
 	int num=count(cutoffunit_p.begin(),cutoffunit_p.end(),',');
@@ -265,23 +352,55 @@ int fuzzy_model( int argc, char *argv[] ){
 
 	string line, id, DNA;
 
-        while( getline(input, line) ){
-                if( line.empty() ){
-                        continue;
-                }
-                if( line[0] == '>' ){
-                        if( !id.empty() ){
-				find_fuzzy( DNA, id, unitlen_p, up_p, flanking_p, revercomple_p, cutoffunit_p, arg, unperfect_percentage_p);
+	if(is_gzip){
+		gz_input = gzopen(fasta.c_str(), "r");
+		if( !gz_input ){
+			cerr << "Can't open " << fasta << endl;
+			return -1;
+		}
+		while( true ){
+			line = read_gz_line(gz_input);
+			if (line.empty()) {
+				if( !id.empty() ){
+					find_fuzzy( DNA, id, unitlen_p, up_p, flanking_p, revercomple_p, cutoffunit_p, arg, unperfect_percentage_p, edit, distance);
+				}
+				break;
 			}
-                        id=line.substr(1);
-                        DNA.clear();
-                }
-                else{
-                        DNA+=line;
-                }
-        }
-        if( !id.empty() ){
-		find_fuzzy( DNA, id, unitlen_p, up_p, flanking_p, revercomple_p, cutoffunit_p, arg, unperfect_percentage_p);
-        }
-	return 0;
+			if( line[0] == '>' ){
+				if( !id.empty() ){
+					find_fuzzy( DNA, id, unitlen_p, up_p, flanking_p, revercomple_p, cutoffunit_p, arg, unperfect_percentage_p, edit, distance);
+				}
+				id=line.substr(1);
+				DNA.clear();
+			}
+			else{
+				DNA+=line;
+			}
+		}
+		gzclose(gz_input);
+		return 0;
+	}
+	else{
+        	while( getline(input, line) ){//AUG 23
+                	
+			if( line.empty() ){
+                        	continue;
+                	}
+                	if( line[0] == '>' ){
+                        	if( !id.empty() ){
+					find_fuzzy( DNA, id, unitlen_p, up_p, flanking_p, revercomple_p, cutoffunit_p, arg, unperfect_percentage_p, edit, distance);
+				}
+                        	id=line.substr(1);
+                        	DNA.clear();
+                	}
+                	else{
+                        	DNA+=line;
+                	}
+        	}
+
+        	if( !id.empty() ){
+			find_fuzzy( DNA, id, unitlen_p, up_p, flanking_p, revercomple_p, cutoffunit_p, arg, unperfect_percentage_p, edit, distance);
+        	}
+		return 0;
+	}
 }

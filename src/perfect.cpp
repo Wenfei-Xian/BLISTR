@@ -94,7 +94,7 @@ void find_perfect(string DNA, string id, int unitlen_p, unsigned int flanking_p,
 				}
 				}
 				start+=ssr_len*repeat-1;
-                                break;
+				break;
                         }
 			//}
                 }
