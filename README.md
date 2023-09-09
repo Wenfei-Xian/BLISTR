@@ -24,7 +24,7 @@ DNA or protein sequences in fasta format, which can be compressed in gz format.
 ```
 BLISTR perfect_str_default -f test.fa > test.fa.blistr.out
 ```
-## Identify tandem repeats of amino acid on 
+## Identify tandem repeats of amino acid on uniprot set
 ```
 wget https://ftp.uniprot.org/pub/databases/uniprot/knowledgebase/complete/uniprot_sprot.fasta.gz
 BLISTR fuzzy_str_default -f uniprot_sprot.fasta.gz > uniprot_sprot.fasta.blistr.fuzzy.out
