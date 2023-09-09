@@ -19,3 +19,19 @@ conda install BLISTR`
 # Usage  
 ## Input Files  
 DNA or protein sequences in fasta format, which can be compressed in gz format.   
+
+## Running BLISTR
+```
+BLISTR perfect_str_default -f test.fa > test.fa.blistr.out
+```
+
+## Available Options:
+```
+BLISTR: BLurry Imperfect Short Tandem Repeats
+Usage: BLISTR <command> [options]
+Command:
+	perfect_str_default <options>
+	perfect_costom <options>
+	fuzzy_str_default <options>
+	fuzzy_costom <options>
+```  
