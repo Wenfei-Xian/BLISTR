@@ -13,4 +13,6 @@ cd BLISTR/src
 make
 ```
 ## Installation with Bioconda  
-`conda install BLISTR`  
+```
+conda install BLISTR`  
+```
