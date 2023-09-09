@@ -37,7 +37,7 @@ Command:
 ```
 
 ## Available Options:
-perfect_str_default  
+### perfect_str_default  
 ```
 BLISTR: BLurry Imperfect Short Tandem Repeats
 Usage: BLISTR perfect_str_default <options>
@@ -48,7 +48,7 @@ Options:
        -u int        whether replace all letters with uppercase letters (default value: 0 -> don't replace; 1 -> replace)
        -r int        whether output the reverse complement sequence (default value: 0 -> don't output; 1 -> output)
 ```
-perfect_costom  
+### perfect_costom  
 ```
 BLISTR: BLurry Imperfect Short Tandem Repeats
 Usage: BLISTR perfect_costom <options>
@@ -60,7 +60,7 @@ Options:
        -u int        whether replace all letters with uppercase letters (default value: 0 -> don't replace; 1 -> replace)
        -r int        whether output the reverse complement sequence (default value: 0 -> don't output; 1 -> output)
 ```
-fuzzy_str_default
+### fuzzy_str_default
 ```
 BLISTR: BLurry Imperfect Short Tandem Repeats
 Usage: BLISTR fuzzy_str_default <options>
@@ -71,7 +71,7 @@ Options:
 	-s int        whether output the flanking sequnce of SSR region (default value: 0 -> don't output; length of flanking sequences -> output)
 	-r int        whether output the reverse complement sequence (defalut value: 0 -> don't output; 1 -> output)
 ```
-fuzzy_costom
+### fuzzy_costom
 ```
 BLISTR: BLurry Imperfect Short Tandem Repeats
 Usage: BLISTR fuzzy_costom <options>
