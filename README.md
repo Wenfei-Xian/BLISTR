@@ -16,4 +16,6 @@ make
 ```
 conda install BLISTR`  
 ```
-## Usage   
+# Usage  
+## Input Files  
+DNA or protein sequences in fasta format, which can be compressed in gz format.   
