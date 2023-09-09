@@ -91,3 +91,5 @@ Options:
 	-s int        whether output the flanking sequnce of SSR region (default value: 0 -> don't output; length of flanking sequences -> output)
 	-r int        whether output the reverse complement sequence (defalut value: 0 -> don't output; 1 -> output)
 ```
+# Contact
+Questions, suggestions are welcome by raising an issue on the github page.
