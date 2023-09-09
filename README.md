@@ -1,7 +1,7 @@
 # BLISTR
 BLurry Imperfect Short Tandem Repeats
 
-# Motivation
+# Motivation  
 
 # Getting Started  
 ## Prerequisites
