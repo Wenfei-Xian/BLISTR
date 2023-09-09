@@ -4,7 +4,7 @@ BLurry Imperfect Short Tandem Repeats in DNA and Protein sequences
 # Motivation  
 
 # Getting Started  
-## Prerequisites
+## Prerequisite
 The only dependency for BLISTR is zlib, which is used for handling gz-compressed files.  
 ## Installation  
 ```
