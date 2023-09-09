@@ -16,3 +16,4 @@ make
 ```
 conda install BLISTR`  
 ```
+## Usage   
