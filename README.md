@@ -1,5 +1,5 @@
 # BLISTR
-BLurry Imperfect Short Tandem Repeats
+BLurry Imperfect Short Tandem Repeats in DNA and Protein sequences
 
 # Motivation  
 
