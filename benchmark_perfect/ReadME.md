@@ -1,4 +1,4 @@
-# **List of tools for comparison along with their respective version numbers**  
+# **Tools for comparison**  
 
 Kmer-ssr: v0.8  
 Misa: v2.1  
