@@ -1,7 +1,9 @@
 # Download the tools  
+```
 wget https://bioinfo.crbm.cnrs.fr/tools/treks/T-REKS.zip  
 wget https://www.ibi.vu.nl/programs/trustwww/trust.tgz  
 wget https://amnewmanlab.stanford.edu/xstream/xstream.zip  
+```
 
 # Commands for XSTREAM  
 ```  
