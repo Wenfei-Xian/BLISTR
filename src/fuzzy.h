@@ -15,4 +15,4 @@ using namespace std;
 //using namespace wfa;
 //int optimizedDP(std::string_view left, std::string_view right, int maxInsertLength, int &matchingBases, int &editDistance);
 //int optimizedDP( string_view left, string_view right, int maxInsertLength, int &matchingBases, int &editDistance, constexpr int m, constexpr int n);
-void find_fuzzy(string DNA, string id, int unitlen_p, int up_p, unsigned int flanking_p, int revercomple_p, string cutoffunit_p, string arg, string unperfect_percentage_p, string edit, int distance );
+void find_fuzzy(string DNA, string id, int unitlen_p, int up_p, unsigned int flanking_p, int revercomple_p, string cutoffunit_p, string arg, string unperfect_percentage_p, string edit, int distance, int protein );

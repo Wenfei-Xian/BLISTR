@@ -4,29 +4,74 @@
 const int MATCH = 2;
 const int MISMATCH = 1;
 const int GAP = -1;
+const int GAP_pro = -6;
+
+const int BLOSUM62[24][24] = {
+//A  R  N  D  C  Q  E  G  H  I  L  K  M  F  P  S  T  W  Y  V  B  Z  X  *
+{4,-1,-2,-2,0,-1,-1,0,-2,-1,-1,-1,-1,-2,-1,1,0,-3,-2,0,-2,-1,0,-4},
+{-1,5,0,-2,-3,1,0,-2,0,-3,-2,2,-1,-3,-2,-1,-1,-3,-2,-3,-1,0,-1,-4},
+{-2,0,6,1,-3,0,0,0,1,-3,-3,0,-2,-3,-2,1,0,-4,-2,-3,3,0,-1,-4},
+{-2,-2,1,6,-3,0,2,-1,-1,-3,-4,-1,-3,-3,-1,0,-1,-4,-3,-3,4,1,-1,-4},
+{0,-3,-3,-3,9,-3,-4,-3,-3,-1,-1,-3,-1,-2,-3,-1,-1,-2,-2,-1,-3,-3,-2,-4},
+{-1,1,0,0,-3,5,2,-2,0,-3,-2,1,0,-3,-1,0,-1,-2,-1,-2,0,3,-1,-4},
+{-1,0,0,2,-4,2,5,-2,0,-3,-3,1,-2,-3,-1,0,-1,-3,-2,-2,1,4,-1,-4},
+{0,-2,0,-1,-3,-2,-2,6,-2,-4,-4,-2,-3,-3,-2,0,-2,-2,-3,-3,-1,-2,-1,-4},
+{-2,0,1,-1,-3,0,0,-2,8,-3,-3,-1,-2,-1,-2,-1,-2,-2,2,-3,0,0,-1,-4},
+{-1,-3,-3,-3,-1,-3,-3,-4,-3,4,2,-3,1,0,-3,-2,-1,-3,-1,3,-3,-3,-1,-4},
+{-1,-2,-3,-4,-1,-2,-3,-4,-3,2,4,-2,2,0,-3,-2,-1,-2,-1,1,-4,-3,-1,-4},
+{-1,2,0,-1,-3,1,1,-2,-1,-3,-2,5,-1,-3,-1,0,-1,-3,-2,-2,0,1,-1,-4},
+{-1,-1,-2,-3,-1,0,-2,-3,-2,1,2,-1,5,0,-2,-1,-1,-1,-1,1,-3,-1,-1,-4},
+{-2,-3,-3,-3,-2,-3,-3,-3,-1,0,0,-3,0,6,-4,-2,-2,1,3,-1,-3,-3,-1,-4},
+{-1,-2,-2,-1,-3,-1,-1,-2,-2,-3,-3,-1,-2,-4,7,-1,-1,-4,-3,-2,-2,-1,-2,-4},
+{1,-1,1,0,-1,0,0,0,-1,-2,-2,0,-1,-2,-1,4,1,-3,-2,-2,0,0,0,-4},
+{0,-1,0,-1,-1,-1,-1,-2,-2,-1,-1,-1,-1,-2,-1,1,5,-2,-2,0,-1,-1,0,-4},
+{-3,-3,-4,-4,-2,-2,-3,-2,-2,-3,-2,-3,-1,1,-4,-3,-2,11,2,-3,-4,-3,-2,-4},
+{-2,-2,-2,-3,-2,-1,-2,-3,2,-1,-1,-2,-1,3,-3,-2,-2,2,7,-1,-3,-2,-1,-4},
+{0,-3,-3,-3,-1,-2,-2,-3,-3,3,1,-2,1,-1,-2,-2,0,-3,-1,4,-3,-2,-1,-4},
+{-2,-1,3,4,-3,0,1,-1,0,-3,-4,0,-3,-3,-2,0,-1,-4,-3,-3,4,1,-1,-4},
+{-1,0,0,1,-3,3,4,-2,0,-3,-3,1,-1,-3,-1,0,-1,-3,-2,-2,1,4,-1,-4},
+{0,-1,-1,-1,-2,-1,-1,-1,-1,-1,-1,-1,-1,-1,-2,0,0,-2,-1,-1,-1,-1,-1,-4},
+{-4,-4,-4,-4,-4,-4,-4,-4,-4,-4,-4,-4,-4,-4,-4,-4,-4,-4,-4,-4,-4,-4,-4,1}
+};
+
 
 int score(char a, char b) {
 	return a == b ? MATCH : MISMATCH;
 }
+
+int score_pro(char a, char b){
+	return BLOSUM62[a - 'A'][b - 'A'];
+}
+
 
 struct DPInfo {
     int dp;
     int direction;
 };
 
-DPInfo merged_dp_direction_L6_I1[2000][2000] = {{0, 0}};
+DPInfo merged_dp_direction_L6_I1[2000][2000] = {{0, 0}}; // maximum STR unit length observed in biology
 
-int optimizedDP_L6_I1( string_view left, string_view right, int maxInsertLength, int &matchingBases, int &editDistance, const int m, const int n) { //specific for short unit
+int optimizedDP_L6_I1( string_view left, string_view right, int maxInsertLength, int &matchingBases, int &editDistance, const int m, const int n, int pro) { //specific for short unit
 	
 	int max_score = 0;
 	int max_i = 0;
 	int max_j = 0;
 	for (int i = 1; i <= m; ++i) {
 		for (int j = max(1, i - maxInsertLength); j <= min(n, i + maxInsertLength); ++j) {
-			int match_score = merged_dp_direction_L6_I1[i - 1][j - 1].dp + score(left[i-1], right[j-1]);
-			int del = merged_dp_direction_L6_I1[i - 1][j].dp + GAP;
-			int ins = merged_dp_direction_L6_I1[i][j - 1].dp + GAP;
-			
+			int match_score=0;
+			int del=0;
+			int ins=0;
+			if(pro == 0){
+				match_score = merged_dp_direction_L6_I1[i - 1][j - 1].dp + score(left[i-1], right[j-1]);
+				del = merged_dp_direction_L6_I1[i - 1][j].dp + GAP;
+				ins = merged_dp_direction_L6_I1[i][j - 1].dp + GAP;
+			}
+			else if(pro == 1){
+				match_score = merged_dp_direction_L6_I1[i - 1][j - 1].dp + score_pro(left[i-1], right[j-1]);
+				del = merged_dp_direction_L6_I1[i - 1][j].dp + GAP_pro;
+				ins = merged_dp_direction_L6_I1[i][j - 1].dp + GAP_pro;
+			}
+
 			int max_val = max({0, match_score, del, ins});
 			int direction_val;
 
@@ -84,7 +129,7 @@ int optimizedDP_L6_I1( string_view left, string_view right, int maxInsertLength,
 	return max_j;
 }
 
-void find_fuzzy(string DNA, string id, int unitlen_p, int up_p, unsigned int flanking_p, int revercomple_p, string cutoffunit_p, string arg, string unperfect_percentage_p, string edit, int distance ){
+void find_fuzzy(string DNA, string id, int unitlen_p, int up_p, unsigned int flanking_p, int revercomple_p, string cutoffunit_p, string arg, string unperfect_percentage_p, string edit, int distance, int protein ){
 	
 	if( up_p == 1){ // up_p : whether transfer all the character to upper, default: 0
 		transform( DNA.begin(), DNA.end(), DNA.begin(), ::toupper);
@@ -148,34 +193,28 @@ void find_fuzzy(string DNA, string id, int unitlen_p, int up_p, unsigned int fla
 
                         for ( ; ; ){
 				repeat++;
+				//cout << "Start " <<id << "\t" << start << "\t" << ssr_len << "\t" << repeat << endl;
 				string_view right_unit;
 				if( start_new+ssr_len+insertion+1 < DNA_len ){
 					right_unit=string_view(DNA).substr( start_new, ssr_len+insertion );
 				}
 				else{
+					repeat--;
 					break;
 				}
 				int matchingBases=0;
 				int editDistance=0;
 				int endPosition=0;
-
-				if( ssr_len <=6 ){
-					endPosition = optimizedDP_L6_I1(left_unit, right_unit, insertion, matchingBases, editDistance, ssr_len, ssr_len+insertion);
-				}/*
-				else if( ssr_len >=7 && ssr_len <=10 ){
-					endPosition = optimizedDP7_10(left_unit, right_unit, insertion, matchingBases, editDistance, ssr_len, ssr_len+insertion);
-				}
-				else if( ssr_len >=11 && ssr_len <=20 ){
-					endPosition = optimizedDP11_20(left_unit, right_unit, insertion, matchingBases, editDistance, ssr_len, ssr_len+insertion);
-				}
-				else if( ssr_len >=21 && ssr_len <=50 ){
-					endPosition = optimizedDP21_50(left_unit, right_unit, insertion, matchingBases, editDistance, ssr_len, ssr_len+insertion);
-				}
-				*/
-				//if( matchingBases == ssr_len && endPosition == ssr_len ){
-				if( editDistance == 0 ){
+				//cout << "Start " <<id << "\t" << start << "\t" << ssr_len << "\t" << repeat << "\t" << left_unit << "\t" << right_unit << endl;
+				endPosition = optimizedDP_L6_I1(left_unit, right_unit, insertion, matchingBases, editDistance, ssr_len, ssr_len+insertion, protein);
+				//cout << left_unit << "\t" << right_unit << "\t" << matchingBases << "\t" << editDistance << "\t" << endPosition << endl;
+				//if( editDistance == 0 ){ 
+				if( editDistance == 0 && matchingBases == ssr_len ){
 					perfect_copy++;
 				}
+
+				//cout << "Before judge " << start << "\t" << left_unit << "\t" << right_unit << "\t" << repeat << "\t" << editDistance << "\t" << matchingBases<< endl;
+				//cout << "Before judge " << start << "\t" << ssr_len << "\t" << left_unit << "\t" << right_unit << "\t" << repeat << "\t" << editDistance << "-" << insertion << "\t" << matchingBases << "-" << ssr_len-insertion << endl;
 
 				//cout << "#@@@@@@@" << start << "\t" << left_unit << "\t" << right_unit << "\t" << endPosition << "\t" << matchingBases << "\t" << editDistance << "\t" << static_cast<double>(repeat-perfect_copy)/static_cast<double>(cutoff_array_main[ssr_len-1]) << "\t" << static_cast<double>(repeat-perfect_copy)/static_cast<double>(repeat) << "\t" << repeat << "\t" << perfect_copy << "\t" << unperfect_percentage << endl;
 				//cout << "#@@@@@@@@" << start << "\t" << left_unit << "\t" << right_unit << "\t" << endPosition << "\t" << repeat << "\t" << perfect_copy << "\t" << matchingBases << "\t" << editDistance << "\t" << "repeat>cutoff:"<< static_cast<double>((repeat-perfect_copy)/repeat) << "\t" << "repeat<cutoff:" << static_cast<double>((repeat-perfect_copy)/cutoff_array_main[ssr_len-1]) << endl;
@@ -205,10 +244,13 @@ void find_fuzzy(string DNA, string id, int unitlen_p, int up_p, unsigned int fla
 					ssr_region+=" ";
 					start_new+=endPosition;
                                 }
-				else if( ssr_len > 1 && ssr_len <=6 ){ //BUG 1-unperfect_percentage = 0.199999988079071, rather than 0.2 BUGBUGBUGBUGBUGBUG
+				else{
+					//cout << "Before judge " << start << "\t" << left_unit << "\t" << right_unit << "\t" << repeat << "\t" << editDistance << "-" << insertion << "\t" << matchingBases << "-" << ssr_len-insertion << endl;
+				//else if( ssr_len > 1 && ssr_len <=6 ){ //BUG 1-unperfect_percentage = 0.199999988079071, rather than 0.2 BUGBUGBUGBUGBUGBUG
                                         if( matchingBases < ssr_len-insertion || editDistance > insertion ){ // Sep 1
-                                                //cout << "#***** No match: " << start << "\t" << left_unit << "\t" << right_unit << "\t" << repeat << "\t" << editDistance << "\t" << matchingBases<< endl;
+                                                //cout << "#***** No match: " << "start" << "\t" << "left_unit" << "\t" << "right_unit" << "\t" << "repeat" << "\t" << "editDistance" << "\t" << "matchingBases" << endl;
 						repeat--;
+						//cout << "#***** No match: " << start << "\t" << left_unit << "\t" << right_unit << "\t" << repeat << "\t" << editDistance << "\t" << matchingBases<< endl;
 						break;
                                         }
                                         else if( repeat < cutoff_array_main[ssr_len-1] && static_cast<double>(repeat-perfect_copy)/static_cast<double>(cutoff_array_main[ssr_len-1]) >= static_cast<double>(unperfect_percentage) ){
@@ -227,39 +269,17 @@ void find_fuzzy(string DNA, string id, int unitlen_p, int up_p, unsigned int fla
                                                 //cout << "#?????????" << start << "\t" << left_unit << "\t" << right_unit << "\t" << endPosition << "\t" << repeat << "\t" << perfect_copy << "\t" << unperfect_percentage<< endl;
 						break;
                                         }
+					//else{
+					//	cout << "#&&&&&&&&" << start << "\t" << left_unit << "\t" << right_unit << "\t" << endPosition << "\t" << repeat << "\t" << perfect_copy << "\t" << unperfect_percentage<< endl;
+					//}
                                         ssr_region+=DNA.substr(start_new,endPosition);
                                         ssr_region+=" ";
                                         start_new+=endPosition;
 				}
-                                else{ //
-					if( matchingBases < ssr_len-insertion || editDistance > insertion ){
-						repeat--;
-						break;
-					}
-					else if( repeat < cutoff_array_main[ssr_len-1] && static_cast<double>(repeat-perfect_copy) / static_cast<double>(cutoff_array_main[ssr_len-1]) >= static_cast<double>(unperfect_percentage) ){
-						repeat--;
-						//ssr_region+=DNA.substr(start_new,endPosition);
-						//ssr_region+=" ";
-						//start_new+=endPosition;
-						//cout << "###!!!!!!!!!" << start << "\t" << left_unit << "\t" << right_unit << "\t" << endPosition << "\t" << matchingBases << "\t" << repeat << "\t" << perfect_copy << endl;
-						break;
-					}
-					else if( repeat >= cutoff_array_main[ssr_len-1] && static_cast<double>(repeat-perfect_copy) / static_cast<double>(repeat) >= static_cast<double>(unperfect_percentage) ){
-						repeat--;
-						//ssr_region+=DNA.substr(start_new,endPosition);
-						//ssr_region+=" ";
-						//start_new+=endPosition;
-						//cout << "###?????????" << start << "\t" << left_unit << "\t" << right_unit << "\t" << endPosition << "\t" << matchingBases << "\t" << repeat << "\t" << perfect_copy << endl;
-						break;
-					}
-					ssr_region+=DNA.substr(start_new,endPosition);
-					ssr_region+=" ";
-					start_new+=endPosition;
-
-                                }
                         }
+			//cout << "Before output " << id << "\t" << start << "\t" << start_new << "\t" << left_unit << "\t" << repeat << endl;
 			if( repeat >= cutoff_array_main[ssr_len-1] ){
-				if( (ssr_len <=6 && perfect_copy >=2) || (ssr_len>6 && perfect_copy >=0) ){
+				if( (ssr_len <=5 && perfect_copy >=2) || (ssr_len>6 && perfect_copy >=0) ){
 				if( (arg == "fuzzy_vntr_default" && ssr_len > 7) || arg == "fuzzy_str_default" || arg == "fuzzy_costom" ){
 				if( revercomple_p > 0 ){
 					string ssr_recom;

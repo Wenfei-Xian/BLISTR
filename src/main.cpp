@@ -220,13 +220,16 @@ int perfect_model( int argc, char *argv[] ){
 
 int fuzzy_model( int argc, char *argv[] ){
 	
+	bool read_from_stdin = false;
+	//cout << "read_from_stdin:" << read_from_stdin<< endl;
 	int a;
 	int unitlen_p=6;
 	int up_p=0;
 	int flanking_p=0;
 	int revercomple_p=0;
-	int distance=-6;
-	string edit="1,1,1,1,1,1";
+	int distance=0;
+	int protein=0;
+	string edit="1,1,1,1,1,2";
 	string cutoffunit_p="12,6,4,3,2,2";
 	string unperfect_percentage_p="0.3,0.4,0.5,0.5,0.5,1";
 	string arg;
@@ -239,10 +242,13 @@ int fuzzy_model( int argc, char *argv[] ){
 
 	int para=0;
 	
-	while(( a=getopt( argc, argv, "f:l:s:u:r:c:p:e:d:")) >= 0 ){
+	while(( a=getopt( argc, argv, "f:l:s:u:r:c:p:e:d:a:")) >= 0 ){
 
 		if( a == 'f' ){
 			fasta=optarg;
+			if (fasta == "-") {
+				read_from_stdin = true;
+			}
 			para++;
 		}
 		else if( a == 'c' ){
@@ -277,8 +283,11 @@ int fuzzy_model( int argc, char *argv[] ){
 			distance=atof(optarg);
 			para++;
 		}
+		else if( a == 'a' ){
+			protein=atof(optarg);
+		}
 	}
-
+	//cout << "read_from_stdin:" << read_from_stdin<< endl;
         if( para == 0 ){
                 if( arg == "fuzzy_str_default"){
                         cout << "BLISTR: BLurry Imperfect Short Tandem Repeats" << endl;
@@ -301,28 +310,42 @@ int fuzzy_model( int argc, char *argv[] ){
                         cout << "	-c string     copy shreshold for each unit, example: -c 12,6,4,3,2,2 (mandatory)" << endl;
 			cout << "	-p string     percentage of imperfect units, example: -p 0.3,0.4,0.5,0.5,0.5,1 (mandatory)" << endl;
                 	cout << "	-e string     edit distance for each unit, example: -e 1,1,1,1,1,2 (mandatory)" << endl;
-			cout << "	-d int        Maximum distance between two seperate STR regions, using negative value for overlapping STRs, example: -d -4" << endl;
+			cout << "	-d int        Maximum distance between two seperate STR regions, using negative value for overlapping STRs, example: -d 0" << endl;
 		}
+		cout << "	-a int        protein or not, example: -a 0 (DNA); -a 1 (protein)" << endl;
 		cout << "	-u int        whether to replace all letters with uppercase letters (default value: 0 -> don't replace; 1 -> replace)" << endl;
 		cout << "	-s int        whether output the flanking sequnce of SSR region (default value: 0 -> don't output; length of flanking sequences -> output)" << endl;
 		cout << "	-r int        whether output the reverse complement sequence (defalut value: 0 -> don't output; 1 -> output)" << endl; 
 		return -1;
         }
 
+	//cout << "read_from_stdin1:" << endl;
+
 	//ifstream input( fasta );
 	ifstream input;
 	gzFile gz_input = nullptr;
 
-	string file_extension = fasta.substr(fasta.size() - 3);
-	bool is_gzip = (file_extension == ".gz");
+	//cout << "read_from_stdin2:" << endl;
 
+	bool is_gzip = false;
+
+	if( read_from_stdin ){
+	}
+	else{
+		string file_extension = fasta.substr(fasta.size() - 3);
+		is_gzip = (file_extension == ".gz");
+	}
+
+	//cout << "read_from_stdin3:" << endl;
+	
 	if (is_gzip) {
 		gz_input = gzopen(fasta.c_str(), "r");
 		if (!gz_input) {
 			cerr << "Can't open " << fasta << endl;
 			return -1;
 		}
-	}else {
+	}
+	else{
 		input.open(fasta);
 		if (!input.good()) {
 			cerr << "Can't open " << fasta << endl;
@@ -352,7 +375,32 @@ int fuzzy_model( int argc, char *argv[] ){
 
 	string line, id, DNA;
 
-	if(is_gzip){
+	//cout << "read_from_stdin" << endl;
+
+	if( read_from_stdin ){
+		//cout << "read_from_stdin" << endl;
+		while (getline(cin, line)) {
+			//cout << line << endl;
+			if (line.empty()) {
+				continue;
+			}
+			if (line[0] == '>') {
+				if (!id.empty()) {
+					find_fuzzy(DNA, id, unitlen_p, up_p, flanking_p, revercomple_p, cutoffunit_p, arg, unperfect_percentage_p, edit, distance, protein);
+				}
+				id = line.substr(1);
+				DNA.clear();
+			}
+			else{
+				DNA+=line;
+			}
+		}
+		if (!id.empty()) {
+			find_fuzzy(DNA, id, unitlen_p, up_p, flanking_p, revercomple_p, cutoffunit_p, arg, unperfect_percentage_p, edit, distance, protein);
+		}
+		return 0;
+	}
+	else if(is_gzip){
 		gz_input = gzopen(fasta.c_str(), "r");
 		if( !gz_input ){
 			cerr << "Can't open " << fasta << endl;
@@ -362,13 +410,13 @@ int fuzzy_model( int argc, char *argv[] ){
 			line = read_gz_line(gz_input);
 			if (line.empty()) {
 				if( !id.empty() ){
-					find_fuzzy( DNA, id, unitlen_p, up_p, flanking_p, revercomple_p, cutoffunit_p, arg, unperfect_percentage_p, edit, distance);
+					find_fuzzy( DNA, id, unitlen_p, up_p, flanking_p, revercomple_p, cutoffunit_p, arg, unperfect_percentage_p, edit, distance, protein);
 				}
 				break;
 			}
 			if( line[0] == '>' ){
 				if( !id.empty() ){
-					find_fuzzy( DNA, id, unitlen_p, up_p, flanking_p, revercomple_p, cutoffunit_p, arg, unperfect_percentage_p, edit, distance);
+					find_fuzzy( DNA, id, unitlen_p, up_p, flanking_p, revercomple_p, cutoffunit_p, arg, unperfect_percentage_p, edit, distance, protein);
 				}
 				id=line.substr(1);
 				DNA.clear();
@@ -388,7 +436,7 @@ int fuzzy_model( int argc, char *argv[] ){
                 	}
                 	if( line[0] == '>' ){
                         	if( !id.empty() ){
-					find_fuzzy( DNA, id, unitlen_p, up_p, flanking_p, revercomple_p, cutoffunit_p, arg, unperfect_percentage_p, edit, distance);
+					find_fuzzy( DNA, id, unitlen_p, up_p, flanking_p, revercomple_p, cutoffunit_p, arg, unperfect_percentage_p, edit, distance, protein);
 				}
                         	id=line.substr(1);
                         	DNA.clear();
@@ -399,7 +447,7 @@ int fuzzy_model( int argc, char *argv[] ){
         	}
 
         	if( !id.empty() ){
-			find_fuzzy( DNA, id, unitlen_p, up_p, flanking_p, revercomple_p, cutoffunit_p, arg, unperfect_percentage_p, edit, distance);
+			find_fuzzy( DNA, id, unitlen_p, up_p, flanking_p, revercomple_p, cutoffunit_p, arg, unperfect_percentage_p, edit, distance, protein);
         	}
 		return 0;
 	}
