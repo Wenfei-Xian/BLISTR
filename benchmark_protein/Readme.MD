@@ -35,3 +35,14 @@ bedtools sort -i BLISTR.rd.bed > BLISTR.rd.sorted.bed
 awk '{if(($3-$2)>=10)print}' BLISTR.rd.sorted.bed > BLISTR.rd.sorted.10aa.bed  
 wc -l BLISTR.rd.sorted.10aa.bed  
 ```
+
+# Commands for BLISTR.parallel  
+```
+time -p bash BLISTR.parallel.sh uniprot_sprot.2023_03.fasta 2  
+time -p bash BLISTR.parallel.sh uniprot_sprot.2023_03.fasta 4  
+time -p bash BLISTR.parallel.sh uniprot_sprot.2023_03.fasta 8  
+time -p bash BLISTR.parallel.sh uniprot_sprot.2023_03.fasta 16  
+time -p bash BLISTR.parallel.sh uniprot_sprot.2023_03.fasta 32  
+time -p bash BLISTR.parallel.sh uniprot_sprot.2023_03.fasta 64  
+time -p bash BLISTR.parallel.sh uniprot_sprot.2023_03.fasta 128  
+```
