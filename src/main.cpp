@@ -6,10 +6,10 @@ int main( int argc, char *argv[] ){
 		return usage();
 	}
 
-	if( strcmp(argv[1], "fuzzy_costom" ) == 0 || strcmp(argv[1], "fuzzy_vntr_default" ) == 0 || strcmp(argv[1], "fuzzy_str_default" ) == 0 ){
+	if( strcmp(argv[1], "fuzzy_custom" ) == 0 || strcmp(argv[1], "fuzzy_vntr_default" ) == 0 || strcmp(argv[1], "fuzzy_str_default" ) == 0 ){
 		return fuzzy_model( argc-1, argv+1 );
 	}
-	else if( strcmp( argv[1], "perfect_costom") == 0 || strcmp( argv[1], "perfect_vntr_default") == 0 || strcmp( argv[1], "perfect_str_default") == 0  ){
+	else if( strcmp( argv[1], "perfect_custom") == 0 || strcmp( argv[1], "perfect_vntr_default") == 0 || strcmp( argv[1], "perfect_str_default") == 0  ){
 		return perfect_model( argc-1, argv+1 );
 	}
 	else{
@@ -40,10 +40,10 @@ int usage(){
 	cout << "Command:" << endl;
 	cout << "	perfect_str_default <options>" << endl;
 	//cout << "	perfect_vntr_default <options>" << endl;
-	cout << "	perfect_costom <options>" << endl;
+	cout << "	perfect_custom <options>" << endl;
 	cout << "	fuzzy_str_default <options>" << endl;
 	//cout << "	fuzzy_vntr_default <options>" << endl;
-	cout << "	fuzzy_costom <options>" << endl;
+	cout << "	fuzzy_custom <options>" << endl;
 	return 0;
 }
 
@@ -106,15 +106,15 @@ int perfect_model( int argc, char *argv[] ){
 		//	cout << "Usage: BLISTR perfect_vntr_default <options>" << endl;
 		//	cout << "	unit length range is 7-200bp and 10,5,4,3,2,2,2,2,2,2,2...." << endl;
 		//}
-		else if( arg == "perfect_costom"){
+		else if( arg == "perfect_custom"){
 			cout << "BLISTR: BLurry Imperfect Short Tandem Repeats" << endl;
-			cout << "Usage: BLISTR perfect_costom <options>" << endl;
+			cout << "Usage: BLISTR perfect_custom <options>" << endl;
 		}
 	        cout << "Options:" << endl;
         	cout << "       -f string     fasta format file (mandatory)" << endl;
-		if( arg == "perfect_costom" ){
+		if( arg == "perfect_custom" ){
 			cout << "       -l int        maximum length of SSR unit, example: -l 10 (mandatory)" << endl;
-			cout << "       -c string     copy shreshold for each unit, example: -c 10,5,4,3,2,2,2,2,2,2 (mandatory)" << endl;
+			cout << "       -c string     copy threshold for each unit, example: -c 10,5,4,3,2,2,2,2,2,2 (mandatory)" << endl;
 		}
 		cout << "       -s int        whether output the flanking sequence of SSR region (default value: 0 -> don't output; length of flanking sequences -> output)" << endl;
 		cout << "       -u int        whether replace all letters with uppercase letters (default value: 0 -> don't replace; 1 -> replace)" << endl;
@@ -299,23 +299,23 @@ int fuzzy_model( int argc, char *argv[] ){
                 //        cout << "Usage: BLISTR fuzzy_vntr_default <options>" << endl;
                 //        cout << "	unit length range is 7-200bp, copy number threshold is 10,5,4,3,2,2,2,2,2,2..., percentage of imperfect threshold is 0.3,0.4,0.5,0.5,0.5,1,1,1,1,1..." << endl;
                 //}
-                else if( arg == "fuzzy_costom"){
+                else if( arg == "fuzzy_custom"){
                         cout << "BLISTR: BLurry Imperfect Short Tandem Repeats" << endl;
-                        cout << "Usage: BLISTR fuzzy_costom <options>" << endl;
+                        cout << "Usage: BLISTR fuzzy_custom <options>" << endl;
                 }
                 cout << "Options:" << endl;
 		cout << "	-f string     fasta format file (mandatory)" << endl;
-                if( arg == "fuzzy_costom" ){
+                if( arg == "fuzzy_custom" ){
                         cout << "	-l int        maximum length of SSR unit, example: -l 6 (mandatory)" << endl;
-                        cout << "	-c string     copy shreshold for each unit, example: -c 12,6,4,3,2,2 (mandatory)" << endl;
+                        cout << "	-c string     copy threshold for each unit, example: -c 12,6,4,3,2,2 (mandatory)" << endl;
 			cout << "	-p string     percentage of imperfect units, example: -p 0.3,0.4,0.5,0.5,0.5,1 (mandatory)" << endl;
                 	cout << "	-e string     edit distance for each unit, example: -e 1,1,1,1,1,2 (mandatory)" << endl;
 			cout << "	-d int        Maximum distance between two seperate STR regions, using negative value for overlapping STRs, example: -d 0" << endl;
 		}
 		cout << "	-a int        protein or not, example: -a 0 (DNA); -a 1 (protein)" << endl;
 		cout << "	-u int        whether to replace all letters with uppercase letters (default value: 0 -> don't replace; 1 -> replace)" << endl;
-		cout << "	-s int        whether output the flanking sequnce of SSR region (default value: 0 -> don't output; length of flanking sequences -> output)" << endl;
-		cout << "	-r int        whether output the reverse complement sequence (defalut value: 0 -> don't output; 1 -> output)" << endl; 
+		cout << "	-s int        whether output the flanking sequence of SSR region (default value: 0 -> don't output; length of flanking sequences -> output)" << endl;
+		cout << "	-r int        whether output the reverse complement sequence (default value: 0 -> don't output; 1 -> output)" << endl; 
 		return -1;
         }
 
