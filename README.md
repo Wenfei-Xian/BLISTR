@@ -2,6 +2,7 @@
 BLurry Imperfect Short Tandem Repeats in DNA and Protein sequences
 
 # Motivation  
+XXX
 
 # Getting Started  
 ## Prerequisite
