@@ -12,7 +12,7 @@ git clone https://github.com/Wenfei-Xian/BLISTR.git
 cd BLISTR/src  
 make
 ```
-## Installation with Bioconda  
+## Installation with Bioconda (on the way)
 ```
 conda install BLISTR  
 ```
