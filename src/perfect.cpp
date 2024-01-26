@@ -45,7 +45,7 @@ void find_perfect(string DNA, string id, int unitlen_p, unsigned int flanking_p,
                         }
 
 			if( repeat >= cutoff_array_main[ssr_len-1] ){
-				//if( (arg == "perfect_vntr_default" && ssr_len > 6) || arg == "perfect_str_default" || arg == "perfect_costom" ){
+				//if( (arg == "perfect_vntr_default" && ssr_len > 6) || arg == "perfect_str_default" || arg == "perfect_custom" ){
 				std::ios::sync_with_stdio(false);
 				std::cin.tie(0);
                                 string ssr_region;
@@ -62,7 +62,7 @@ void find_perfect(string DNA, string id, int unitlen_p, unsigned int flanking_p,
 					ssr+="\t";
 					ssr+=ssr_recom;
 				}
-				if( (arg == "perfect_vntr_default" && ssr_len > 6) || arg == "perfect_str_default" || arg == "perfect_costom" ){
+				if( (arg == "perfect_vntr_default" && ssr_len > 6) || arg == "perfect_str_default" || arg == "perfect_custom" ){
 				if( flanking_p == 0 ){
 					cout << id << "\t" << start+1 << "\t" << start+ssr_len*repeat << "\t" << ssr << "\t" << repeat << "\t" << repeat*ssr_len << "\t" << ssr_region << "\n";
 				}
