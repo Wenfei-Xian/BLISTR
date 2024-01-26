@@ -280,7 +280,7 @@ void find_fuzzy(string DNA, string id, int unitlen_p, int up_p, unsigned int fla
 			//cout << "Before output " << id << "\t" << start << "\t" << start_new << "\t" << left_unit << "\t" << repeat << endl;
 			if( repeat >= cutoff_array_main[ssr_len-1] ){
 				if( (ssr_len <=5 && perfect_copy >=2) || (ssr_len>6 && perfect_copy >=0) ){
-				if( (arg == "fuzzy_vntr_default" && ssr_len > 7) || arg == "fuzzy_str_default" || arg == "fuzzy_costom" ){
+				if( (arg == "fuzzy_vntr_default" && ssr_len > 7) || arg == "fuzzy_str_default" || arg == "fuzzy_custom" ){
 				if( revercomple_p > 0 ){
 					string ssr_recom;
 					ssr_recom=left_unit;
