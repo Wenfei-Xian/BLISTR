@@ -26,6 +26,9 @@ void find_perfect(string DNA, string id, int unitlen_p, unsigned int flanking_p,
 			short repeat=1;
 
 			for (;;++repeat){
+				if (start + ssr_len * repeat + ssr_len > DNA_len) {
+					break;
+				}
                                 short match=0;
                                 for (short base=0;base<ssr_len; ++base){
 					char left(DNA[start+base]);
